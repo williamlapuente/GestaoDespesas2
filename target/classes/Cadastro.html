@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Despesas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script>
+        var usuarios = []; // Array para armazenar os dados dos usuários
+        var usuarioEditando = null;
+
+        function fazerCadastro() {
+            var nome = document.getElementById('nomeUsuario').value;
+            var email = document.getElementById('emailUsuario').value;
+            var login = document.getElementById('loginUsuario').value;
+            var senha = document.getElementById('senhaUsuario').value;
+
+            // Verificar se todos os campos estão preenchidos
+            if (nome === '' || email === '' || login === '' || senha === '') {
+                document.getElementById('resultadoCadastro').innerHTML = "Status: Todos os campos são obrigatórios!";
+                return;
+            }
+
+            if (usuarioEditando !== null) {
+                // Editar o usuário existente
+                usuarios[usuarioEditando] = { nome: nome, email: email, login: login, senha: senha };
+                usuarioEditando = null;
+                document.getElementById('resultadoCadastro').innerHTML = "Status: Usuário editado com sucesso!";
+            } else {
+                // Adicionar um novo usuário
+                var usuario = { nome: nome, email: email, login: login, senha: senha };
+                usuarios.push(usuario);
+                document.getElementById('resultadoCadastro').innerHTML = "Status: Usuário cadastrado com sucesso!";
+            }
+
+            // Limpar o formulário
+            document.getElementById('nomeUsuario').value = '';
+            document.getElementById('emailUsuario').value = '';
+            document.getElementById('loginUsuario').value = '';
+            document.getElementById('senhaUsuario').value = '';
+
+            // Atualizar a lista de usuários
+            atualizarListaUsuarios();
+        }
+
+        function atualizarListaUsuarios() {
+            var dadosUsuarios = "<ul>";
+            for (var i = 0; i < usuarios.length; i++) {
+                dadosUsuarios += "<li>" +
+                    "Nome: " + usuarios[i].nome + ", " +
+                    "Email: " + usuarios[i].email + ", " +
+                    "Login: " + usuarios[i].login + " " +
+                    "<button onclick='editarUsuario(" + i + ")'>Editar</button> " +
+                    "<button onclick='excluirUsuario(" + i + ")'>Excluir</button>" +
+                    "</li>";
+            }
+            dadosUsuarios += "</ul>";
+
+            document.getElementById('dadosCadastrados').innerHTML = dadosUsuarios;
+        }
+
+        function editarUsuario(indice) {
+            var usuario = usuarios[indice];
+            document.getElementById('nomeUsuario').value = usuario.nome;
+            document.getElementById('emailUsuario').value = usuario.email;
+            document.getElementById('loginUsuario').value = usuario.login;
+            document.getElementById('senhaUsuario').value = usuario.senha;
+            usuarioEditando = indice;
+        }
+
+        function excluirUsuario(indice) {
+            usuarios.splice(indice, 1);
+            atualizarListaUsuarios();
+            document.getElementById('resultadoCadastro').innerHTML = "Status: Usuário excluído com sucesso!";
+        }
+
+        function fazerLogin() {
+            var login = document.getElementById('loginUsuarioLogin').value;
+            var senha = document.getElementById('senhaUsuarioLogin').value;
+
+            var usuarioValido = false;
+
+            // Verifica se o login e a senha correspondem a algum usuário cadastrado
+            for (var i = 0; i < usuarios.length; i++) {
+                if (usuarios[i].login === login && usuarios[i].senha === senha) {
+                    usuarioValido = true;
+                    break;
+                }
+            }
+
+            if (usuarioValido) {
+                document.getElementById('resultadoLogin').innerHTML = "Status: Login bem-sucedido!";
+            } else {
+                document.getElementById('resultadoLogin').innerHTML = "Status: Login ou senha inválidos.";
+            }
+        }
+
+        function gerarRelatorio(tipo) {
+            var dataInicio = document.getElementById('dataInicio').value;
+            var dataFim = document.getElementById('dataFim').value;
+
+            // Verificar se as datas foram preenchidas
+            if (dataInicio === '' || dataFim === '') {
+                alert('Por favor, selecione as datas de início e fim.');
+                return;
+            }
+
+            // Converter as datas para objetos Date
+            var dateInicio = new Date(dataInicio);
+            var dateFim = new Date(dataFim);
+            var dataAtual = new Date();
+
+            // Verificar se a data de início é superior à data de fim
+            if (dateInicio > dateFim) {
+                alert('A data de início não pode ser superior à data de fim.');
+                return;
+            }
+
+            // Verificar se a data de fim é superior à data atual
+            if (dateFim > dataAtual) {
+                alert('A data de fim não pode ser superior à data atual.');
+                return;
+            }
+
+            alert("Gerando relatório: " + tipo + "\nDe: " + dataInicio + "\nAté: " + dataFim);
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cadastro de Usuário</h1>
+
+    <form>
+        <fieldset>
+            <div class="form-group">
+                <label for="nomeUsuario">Nome do usuário:</label>
+                <input type="text" class="form-control" id="nomeUsuario">
+            </div>
+            <div class="form-group">
+                <label for="cpf">CPF:</label>
+                <input type="text" class="form-control" id="cpf" name="cpf" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" required>
+            </div>
+            <div class="form-group">
+                <label for="emailUsuario">E-mail:</label>
+                <input type="email" class="form-control" id="emailUsuario">
+            </div>
+            <div class="form-group">
+                <label for="loginUsuario">Login:</label>
+                <input type="text" class="form-control" id="loginUsuario">
+            </div>
+            <div class="form-group">
+                <label for="senhaUsuario">Senha:</label>
+                <input type="password" class="form-control" id="senhaUsuario">
+            </div>
+        </fieldset>
+        <br/><br/>
+        <input type="button" class="btn btn-primary" id="elementosForm:cadastrar" value="Cadastrar" onclick="fazerCadastro()">
+        <input type="reset" class="btn btn-secondary" value="Limpar">
+    </form>
+
+    <div id="resultadoCadastro">Status: Não cadastrado</div>
+    <div id="dadosCadastrados"></div>
+</div>
+<br/><br/><br/>
+<hr/>
+
+<div class="container">
+    <h1>Login de Usuário</h1>
+
+    <form>
+        <fieldset>
+            <div class="form-group">
+                <label for="loginUsuarioLogin">Login:</label>
+                <input type="text" class="form-control" id="loginUsuarioLogin">
+            </div>
+            <div class="form-group">
+                <label for="senhaUsuarioLogin">Senha:</label>
+                <input type="password" class="form-control" id="senhaUsuarioLogin">
+            </div>
+        </fieldset>
+        <br/><br/>
+        <input type="button" class="btn btn-primary" value="Login" onclick="fazerLogin()">
+        <input type="reset" class="btn btn-secondary" value="Limpar">
+    </form>
+
+    <div id="resultadoLogin">Status: Não logado</div>
+</div>
+<br/><br/><br/>
+<hr/>
+
+<div id="opcoesRelatorios" class="container">
+    <h1>Opções de Relatórios</h1>
+    <div class="form-group">
+        <label for="dataInicio">Data de Início:</label>
+        <input type="date" class="form-control" id="dataInicio">
+    </div>
+    <div class="form-group">
+        <label for="dataFim">Data de Fim:</label>
+        <input type="date" class="form-control" id="dataFim">
+    </div>
+    <div class="form-group">
+        <label>Filtro de Despesas:</label>
+        <form id="filtroDespesas">
+            <label>
+                <input type="radio" name="filtroDespesas" value="credor"> Despesas por Credor
+            </label>
+            <label>
+                <input type="radio" name="filtroDespesas" value="tipo"> Despesas por Tipo
+            </label>
+            <label>
+                <input type="radio" name="filtroDespesas" value="fisicas"> Relatório por Bases Físicas
+            </label>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
